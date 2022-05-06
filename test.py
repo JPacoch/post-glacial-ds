@@ -7,6 +7,8 @@ from sklearn.model_selection import learning_curve
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
+from callbacks import tensor_board, callbacks
+
 EPOCHS = 30
 BATCH_SIZE = 15
 IMG_WIDTH, IMG_HEIGHT = 128, 128
@@ -60,15 +62,17 @@ def createModel():
                     metrics=['accuracy'])
     model.summary()
 
-    return model
+    #tf.keras.utils.plot_model(model, to_file='plots/model_structure.png', show_shapes=True)
 
+    return model
 
 def fitModel(model,trainGen,epoch, stepsPE, validationGen, stepsVal):
     history = model.fit(trainGen, 
                         epochs=epoch,
                         steps_per_epoch = stepsPE, 
                         validation_data=validationGen,
-                        validation_steps = stepsVal)
+                        validation_steps = stepsVal,
+                        callbacks=tensor_board+callbacks)
 
     return history
 

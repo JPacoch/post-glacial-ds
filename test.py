@@ -14,21 +14,21 @@ IMG_WIDTH, IMG_HEIGHT = 128, 128
 #train_set = 
 #test_set = 
 
-# #Loading train set data as image generator - rescaling 1./255
-# train_generator = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255).flow_from_directory(directory=train_set, 
-#                                                                         class_mode='categorical', 
-#                                                                         target_size=(IMG_WIDTH, IMG_HEIGHT),
-#                                                                         color_mode="grayscale",
-#                                                                         batch_size=BATCH_SIZE
-#                                                                         shuffle=True)
+#Loading train set data as image generator - rescaling 1./255
+train_generator = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255).flow_from_directory(directory=train_set, 
+                                                                        class_mode='categorical', 
+                                                                        target_size=(IMG_WIDTH, IMG_HEIGHT),
+                                                                        color_mode="grayscale",
+                                                                        batch_size=BATCH_SIZE
+                                                                        shuffle=True)
 
-# #Loading test set data as image generator - rescaling 1./255
-# test_generator = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255).flow_from_directory(directory=test_set, 
-#                                                                          class_mode='categorical', 
-#                                                                          target_size=(IMG_WIDTH, IMG_HEIGHT),
-#                                                                          color_mode="grayscale",
-#                                                                          batch_size=BATCH_SIZE
-#                                                                          shuffle=True)
+#Loading test set data as image generator - rescaling 1./255
+validation_generator = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255).flow_from_directory(directory=test_set, 
+                                                                         class_mode='categorical', 
+                                                                         target_size=(IMG_WIDTH, IMG_HEIGHT),
+                                                                         color_mode="grayscale",
+                                                                         batch_size=BATCH_SIZE
+                                                                         shuffle=True)
 
 #Model creation; AlexNet-like CNN with 40% dropout
 
@@ -50,7 +50,7 @@ def createModel():
         tf.keras.layers.Dense(128, activation='relu'),
         tf.keras.layers.Dropout(0.4),
         tf.keras.layers.Dense(64, activation='relu'),
-        tf.keras.layers.Dense(10, activation='softmax')
+        tf.keras.layers.Dense(1, activation='softmax')
     ])
 
     opt = tf.keras.optimizers.Adamax(learning_rate=0.001, beta_1=0.9, beta_2=0.999)
@@ -62,7 +62,17 @@ def createModel():
 
     return model
 
-# history = model.fit(train_set, epochs=EPOCHS, validation_data=test_set)
+
+def fitModel(model,trainGen,epoch, stepsPE, validationGen, stepsVal):
+    history = model.fit(trainGen, 
+                        epochs=epoch,
+                        steps_per_epoch = stepsPE, 
+                        validation_data=validationGen,
+                        validation_steps = stepsVal)
+
+    return history
+
+fitModel(createModel(), trainGen=train_generator, epoch=EPOCHS, stepsPE=100, validationGen=validation_generator, stepsVal=15)
 
 #Feature Extractor; VGG16 model optimized by Adamax and ResNet50
 
@@ -92,7 +102,7 @@ def createVGG16Model():
 
 def createResNet50():
     resnet = tf.keras.applications.ResNet50(weights='imagenet', 
-                                            input_shape=(IMG_WIDTH, IMG_HEIGHT, 3), #3 bands ok; 1 band error
+                                            input_shape=(IMG_WIDTH, IMG_HEIGHT, 1), #3 bands ok; 1 band error
                                             include_top=True)
     for layer in resnet.layers[:]:
         layer.trainable = False

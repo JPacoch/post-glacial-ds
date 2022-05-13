@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from callbacks import tensor_board, callbacks
 
-EPOCHS = 30
+EPOCHS = 200
 BATCH_SIZE = 15
 IMG_WIDTH, IMG_HEIGHT = 128, 128
 

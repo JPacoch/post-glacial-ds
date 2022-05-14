@@ -1,4 +1,5 @@
 from cProfile import label
+from re import X
 from pyproj import transform
 import rasterio
 import numpy as np
@@ -6,13 +7,15 @@ import pandas as pd
 import geopandas as gpd
 import tensorflow as tf
 import matplotlib.pyplot as plt
+from PIL import Image
+import sklearn.model_selection
 
 #Loading prepared point dataset
 points = gpd.read_file("C:/Users/pacoc/Desktop/a.shp")
 print(points)
 
 #DEM / Hillshade for Poland
-src = rasterio.open('C:/Users/pacoc/Desktop/Warsztat/Studia/mag/data/DEM.tif')
+src = rasterio.open('C:/Users/pacoc/Desktop/Warsztat/Studia/mag/data/hillshade.tif')
 
 windows_list = []
 
@@ -24,6 +27,8 @@ for point in points['geometry']:
     rst = src.read(1, window=rasterio.windows.Window(col_off=col, row_off=row,
                                                      width=128, height=128))
     windows_list.append(rst)
+    # plt.imshow(rst, cmap='binary')
+    # plt.show()
 
 # print(windows_list[0])
 # print(len(windows_list[0]))
@@ -64,5 +69,22 @@ def arrayListToTensor(list):
 #     return tensor_list
 
 tensor = arrayListToTensor(windows_list)
-plt.imshow(tensor[1])
-plt.show()
+# plt.imshow(tensor[1])
+# plt.show()
+
+X_train, X_val, y_train, y_val = sklearn.model_selection.train_test_split(windows_list,
+                                                    labels_list,
+                                                    test_size=0.20,
+                                                    random_state=42)
+
+i = 0
+for arr in range(1,len(X_train)):
+    arr = Image.fromarray(X_train[i])
+    arr.save(f'data/train/{i}.png', format='PNG')
+    i = i + 1
+
+j = 0
+for arr in range(1,len(X_val)):
+    arr = Image.fromarray(X_val[j])
+    arr.save(f'data/val/{j}.png', format='PNG')
+    j = j + 1

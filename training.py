@@ -2,10 +2,10 @@ import rasterio
 import numpy as np
 import pandas as pd
 import geopandas as gpd
-from sklearn import metrics
-from sklearn.model_selection import learning_curve
 import tensorflow as tf
 import matplotlib.pyplot as plt
+from sklearn import metrics
+from sklearn.model_selection import learning_curve
 
 from callbacks import tensor_board, callbacks
 
@@ -13,15 +13,16 @@ EPOCHS = 200
 BATCH_SIZE = 15
 IMG_WIDTH, IMG_HEIGHT = 128, 128
 
-#train_set = 
-#val_set = 
+train_set = "data/train"
+test_set = "data/test"
+val_set = "data/val"
 
 #Loading train set data as image generator - rescaling 1./255
 train_generator = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255).flow_from_directory(directory=train_set, 
                                                                         class_mode='categorical', 
                                                                         target_size=(IMG_WIDTH, IMG_HEIGHT),
                                                                         color_mode="grayscale",
-                                                                        batch_size=BATCH_SIZE
+                                                                        batch_size=BATCH_SIZE,
                                                                         shuffle=True)
 
 #Loading validation set data as image generator - rescaling 1./255
@@ -29,7 +30,7 @@ validation_generator = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1
                                                                          class_mode='categorical', 
                                                                          target_size=(IMG_WIDTH, IMG_HEIGHT),
                                                                          color_mode="grayscale",
-                                                                         batch_size=BATCH_SIZE
+                                                                         batch_size=BATCH_SIZE,
                                                                          shuffle=True)
 
 #Model creation; AlexNet-like CNN with 40% dropout

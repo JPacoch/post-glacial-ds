@@ -17,5 +17,4 @@ callbacks = [
     # tf.keras.callbacks.EarlyStopping(patience=1,
     #                                 monitor='acc'),
     # tf.keras.callbacks.ModelCheckpoint()
-
 ]

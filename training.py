@@ -10,8 +10,10 @@ from sklearn.model_selection import learning_curve
 from callbacks import tensor_board, callbacks
 
 EPOCHS = 200
-BATCH_SIZE = 15
+BATCH_SIZE = 20
 IMG_WIDTH, IMG_HEIGHT = 128, 128
+train_samples=78
+validation_samples=20
 
 train_set = "data/train"
 test_set = "data/test"
@@ -19,7 +21,7 @@ val_set = "data/val"
 
 #Loading train set data as image generator - rescaling 1./255
 train_generator = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255).flow_from_directory(directory=train_set, 
-                                                                        class_mode='categorical', 
+                                                                        class_mode='binary', 
                                                                         target_size=(IMG_WIDTH, IMG_HEIGHT),
                                                                         color_mode="grayscale",
                                                                         batch_size=BATCH_SIZE,
@@ -27,7 +29,7 @@ train_generator = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255
 
 #Loading validation set data as image generator - rescaling 1./255
 validation_generator = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255).flow_from_directory(directory=val_set, 
-                                                                         class_mode='categorical', 
+                                                                         class_mode='binary', 
                                                                          target_size=(IMG_WIDTH, IMG_HEIGHT),
                                                                          color_mode="grayscale",
                                                                          batch_size=BATCH_SIZE,
@@ -35,31 +37,50 @@ validation_generator = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1
 
 #Model creation; AlexNet-like CNN with 40% dropout
 
+# def createModel():
+#     model = tf.keras.models.Sequential([
+#         tf.keras.layers.Conv2D(64, 11, activation='relu', padding='same', 
+#                                                 input_shape=[IMG_WIDTH,IMG_HEIGHT, 1]),
+#         tf.keras.layers.MaxPooling2D(2),
+#         tf.keras.layers.Conv2D(128, 5, activation='relu', padding='valid'),
+#         tf.keras.layers.Conv2D(128, 3, activation='relu', padding='same'),
+#         tf.keras.layers.MaxPooling2D(2),
+#         tf.keras.layers.Conv2D(256, 3, activation='relu', padding='valid'),
+#         tf.keras.layers.Conv2D(256, 3, activation='relu', padding='valid'),
+#         tf.keras.layers.MaxPooling2D(2),
+#         tf.keras.layers.Conv2D(512, 3, activation='relu', padding='valid'),
+#         tf.keras.layers.Conv2D(512, 3, activation='relu', padding='valid'),
+#         tf.keras.layers.MaxPooling2D(2),
+#         tf.keras.layers.Flatten(),
+#         tf.keras.layers.Dense(128, activation='relu'),
+#         tf.keras.layers.Dropout(0.4),
+#         tf.keras.layers.Dense(64, activation='relu'),
+#         tf.keras.layers.Dense(1, activation='softmax')
+#     ])
+
 def createModel():
     model = tf.keras.models.Sequential([
-        tf.keras.layers.Conv2D(64, 11, activation='relu', padding='same', 
+        tf.keras.layers.Conv2D(64, 5, activation='relu', 
                                                 input_shape=[IMG_WIDTH,IMG_HEIGHT, 1]),
         tf.keras.layers.MaxPooling2D(2),
-        tf.keras.layers.Conv2D(128, 5, activation='relu', padding='valid'),
-        tf.keras.layers.Conv2D(128, 3, activation='relu', padding='same'),
+        tf.keras.layers.Conv2D(64, 5, activation='relu'),
+        tf.keras.layers.Conv2D(64, 5, activation='relu'),
         tf.keras.layers.MaxPooling2D(2),
-        tf.keras.layers.Conv2D(256, 3, activation='relu', padding='valid'),
-        tf.keras.layers.Conv2D(256, 3, activation='relu', padding='valid'),
+        tf.keras.layers.Conv2D(128, 3, activation='relu'),
+        tf.keras.layers.Conv2D(128, 3, activation='relu'),
         tf.keras.layers.MaxPooling2D(2),
-        tf.keras.layers.Conv2D(512, 3, activation='relu', padding='valid'),
-        tf.keras.layers.Conv2D(512, 3, activation='relu', padding='valid'),
+        tf.keras.layers.Conv2D(256, 3, activation='relu'),
+        tf.keras.layers.Conv2D(256, 3, activation='relu'),
         tf.keras.layers.MaxPooling2D(2),
         tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dense(256, activation='relu'),
         tf.keras.layers.Dropout(0.4),
-        tf.keras.layers.Dense(64, activation='relu'),
-        tf.keras.layers.Dense(1, activation='softmax')
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dense(1, activation='sigmoid')
     ])
-
-    opt = tf.keras.optimizers.Adamax(learning_rate=0.001, beta_1=0.9, beta_2=0.999)
-
+    sgd = tf.keras.optimizers.SGD(lr=1e-6)
     model.compile(loss="binary_crossentropy",
-                    optimizer=opt,
+                    optimizer=tf.keras.optimizers.Adam(0.001),
                     metrics=['accuracy'])
     model.summary()
 
@@ -79,7 +100,8 @@ def fitModel(model,trainGen, epoch, stepsPE, validationGen, stepsVal):
 
     return history
 
-fitModel(createModel(), trainGen=train_generator, epoch=EPOCHS, stepsPE=100, validationGen=validation_generator, stepsVal=15)
+fitModel(createModel(), trainGen=train_generator, epoch=EPOCHS, stepsPE=train_samples//BATCH_SIZE,
+ validationGen=validation_generator, stepsVal=validation_samples//BATCH_SIZE)
 
 #training for arrays?
 

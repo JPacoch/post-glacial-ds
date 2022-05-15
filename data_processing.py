@@ -11,7 +11,7 @@ from cProfile import label
 from pyproj import transform
 
 #Loading prepared point dataset
-points = gpd.read_file("C:/Users/pacoc/Desktop/a.shp")
+points = gpd.read_file("C:/Users/pacoc/Desktop/Warsztat/Studia/mag/data/punkty/punkty1.gpkg", layer = 'punkty1')
 
 #DEM / Hillshade for Poland
 src = rasterio.open('C:/Users/pacoc/Desktop/Warsztat/Studia/mag/data/hillshade.tif')

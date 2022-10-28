@@ -4,6 +4,7 @@ import pandas as pd
 import geopandas as gpd
 import tensorflow as tf
 import matplotlib.pyplot as plt
+from turtle import color
 from sklearn import metrics
 from sklearn.model_selection import learning_curve
 
@@ -11,8 +12,8 @@ from callbacks import tensor_board, callbacks
 from config import EPOCHS, IMG_HEIGHT, IMG_WIDTH, BATCH_SIZE
 
 
-train_samples=78
-test_samples=20
+train_samples=118
+test_samples=40
 
 train_set = "points/train"
 test_set = "points/test"
@@ -38,22 +39,27 @@ test_generator = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255)
 
 def createModel(IMG_WIDTH, IMG_HEIGHT):
     model = tf.keras.models.Sequential([
-        tf.keras.layers.Conv2D(64, 3, activation='relu', 
+        tf.keras.layers.Conv2D(128, 3, activation='relu', 
                                                 input_shape=[IMG_WIDTH,IMG_HEIGHT,1]),
+        tf.keras.layers.BatchNormalization(),                                        
         tf.keras.layers.MaxPooling2D(2),
         tf.keras.layers.Conv2D(128, 3, activation='relu'),
-        tf.keras.layers.Conv2D(128, 3, activation='relu'),
+        tf.keras.layers.Conv2D(64, 3, activation='relu'),
+        tf.keras.layers.BatchNormalization(), 
         tf.keras.layers.MaxPooling2D(2),
-        tf.keras.layers.Conv2D(256, 3, activation='relu'),
-        tf.keras.layers.Conv2D(256, 3, activation='relu'),
+        tf.keras.layers.Conv2D(32, 3, activation='relu'),
+        tf.keras.layers.Conv2D(32, 3, activation='relu'),
+        tf.keras.layers.BatchNormalization(), 
         tf.keras.layers.MaxPooling2D(2),
         tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(256, activation='relu'),
+        tf.keras.layers.BatchNormalization(), 
+        tf.keras.layers.Dense(32, activation='relu'),
         tf.keras.layers.Dropout(0.4),
         tf.keras.layers.Dense(1, activation='sigmoid')
     ])
+
     model.compile(loss="binary_crossentropy",
-                    optimizer=tf.keras.optimizers.Adam(0.001),
+                    optimizer=tf.keras.optimizers.Adam(0.000001),
                     metrics=['accuracy'])
     model.summary()
 
@@ -73,7 +79,7 @@ def fitModel(model,trainGen, epoch, stepsPE, validationGen, stepsVal):
 
     return history
 
-fitModel(createModel(IMG_WIDTH, IMG_HEIGHT), trainGen=train_generator, epoch=EPOCHS, stepsPE=train_samples//BATCH_SIZE,
+history = fitModel(createModel(IMG_WIDTH, IMG_HEIGHT), trainGen=train_generator, epoch=EPOCHS, stepsPE=train_samples//BATCH_SIZE,
  validationGen=test_generator, stepsVal=test_samples//BATCH_SIZE)
 
 #training for arrays?
@@ -83,3 +89,11 @@ fitModel(createModel(IMG_WIDTH, IMG_HEIGHT), trainGen=train_generator, epoch=EPO
 # fitModel(createModel(), trainGen=train_generator.flow(train_tensor, train_label, batch_size=BATCH_SIZE, subset='training'),
 #  epoch=EPOCHS, stepsPE=100, validationGen=validation_generator.flow(val_tensor, val_label, batch_size=BATCH_SIZE, subset='validation'), 
 #  stepsVal=15)
+
+plt.plot(history.history['accuracy'], color = 'darkblue')
+plt.plot(history.history['val_accuracy'], color = 'lightblue')
+plt.title('Model Accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Epoch')
+plt.legend(['train', 'test'], loc='lower right')
+plt.show()

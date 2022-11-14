@@ -1,3 +1,4 @@
+import cv2
 import rasterio
 import numpy as np
 import pandas as pd
@@ -8,7 +9,7 @@ from turtle import color
 from sklearn import metrics
 from sklearn.model_selection import learning_curve
 
-from plot import plot_training
+from plot import PlotModel
 from callbacks import tensor_board, callbacks
 from models_generators import createModel, fitModel
 from config import EPOCHS, IMG_HEIGHT, IMG_WIDTH, BATCH_SIZE
@@ -37,9 +38,36 @@ test_generator = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255)
                                                                          batch_size=BATCH_SIZE,
                                                                          shuffle=True)
 
+model = tf.keras.models.Sequential([
+    tf.keras.layers.Conv2D(128, 3, activation='relu', 
+                                            input_shape=[IMG_WIDTH,IMG_HEIGHT,1]),
+    tf.keras.layers.BatchNormalization(),                                        
+    tf.keras.layers.MaxPooling2D(2),
+    tf.keras.layers.Conv2D(128, 3, activation='relu'),
+    tf.keras.layers.Conv2D(64, 3, activation='relu'),
+    tf.keras.layers.BatchNormalization(), 
+    tf.keras.layers.MaxPooling2D(2),
+    tf.keras.layers.Conv2D(32, 3, activation='relu'),
+    tf.keras.layers.Conv2D(32, 3, activation='relu'),
+    tf.keras.layers.BatchNormalization(), 
+    tf.keras.layers.MaxPooling2D(2),
+    tf.keras.layers.Flatten(),
+    tf.keras.layers.BatchNormalization(), 
+    tf.keras.layers.Dense(32, activation='relu'),
+    tf.keras.layers.Dropout(0.4),
+    tf.keras.layers.Dense(1, activation='sigmoid')
+])
+
+model.compile(loss="binary_crossentropy",
+                optimizer=tf.keras.optimizers.Adam(0.00001),
+                metrics=['accuracy'])
+model.summary()
+
 #Model learning 
-history = fitModel(createModel(IMG_WIDTH, IMG_HEIGHT), trainGen=train_generator, epoch=EPOCHS, stepsPE=train_samples//BATCH_SIZE,
+history = fitModel(model, trainGen=train_generator, epoch=EPOCHS, stepsPE=train_samples//BATCH_SIZE,
  validationGen=test_generator, stepsVal=test_samples//BATCH_SIZE)
+
+model.save('test.h5')
 
 #training for arrays?
 
@@ -49,4 +77,22 @@ history = fitModel(createModel(IMG_WIDTH, IMG_HEIGHT), trainGen=train_generator,
 #  epoch=EPOCHS, stepsPE=100, validationGen=validation_generator.flow(val_tensor, val_label, batch_size=BATCH_SIZE, subset='validation'), 
 #  stepsVal=15)
 
-plot_training(history=history)
+plotCls = PlotModel()
+plotCls.plot_training(history=history)
+
+#feature extraction 
+# feature_extractor = tf.keras.Model(
+#    inputs = model.inputs,
+#    outputs = [layer.output for layer in model.layers],
+# )
+
+# features = feature_extractor(test_generator)
+
+# def getFeatureVector(model, img_path):
+#   img = cv2.imread(img_path)
+#   img = cv2.resize(img, (224, 224))
+#   img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+#   feature_vector = model.predict(img.reshape(1, 128, 128, 1))
+#   return feature_vector
+
+# a = getFeatureVector(model=model, img_path='points/train/denuded/denuded0.png')

@@ -136,3 +136,6 @@ logs
 arrays
 points
 plots
+
+#model
+*.h5

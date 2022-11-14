@@ -43,7 +43,7 @@ model = tf.keras.models.Sequential([
                                             input_shape=[IMG_WIDTH,IMG_HEIGHT,1]),
     tf.keras.layers.BatchNormalization(),                                        
     tf.keras.layers.MaxPooling2D(2),
-    tf.keras.layers.Conv2D(128, 3, activation='relu'),
+    tf.keras.layers.Conv2D(64, 3, activation='relu'),
     tf.keras.layers.Conv2D(64, 3, activation='relu'),
     tf.keras.layers.BatchNormalization(), 
     tf.keras.layers.MaxPooling2D(2),
@@ -81,16 +81,16 @@ plotCls = PlotModel()
 plotCls.plot_training(history=history)
 
 #feature extraction 
-# feature_extractor = tf.keras.Model(
-#    inputs = model.inputs,
-#    outputs = [layer.output for layer in model.layers],
-# )
+feature_extractor = tf.keras.Model(
+   inputs = model.inputs,
+   outputs = [layer.output for layer in model.layers],
+)
 
 # features = feature_extractor(test_generator)
 
 # def getFeatureVector(model, img_path):
 #   img = cv2.imread(img_path)
-#   img = cv2.resize(img, (224, 224))
+#   img = cv2.resize(img, (128, 128))
 #   img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 #   feature_vector = model.predict(img.reshape(1, 128, 128, 1))
 #   return feature_vector

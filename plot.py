@@ -47,6 +47,8 @@ class PlotModel():
     def plot_fmaps(self, names_layer, model_predictions, img_per_row=18):
 
         for name_layer, model_layer in zip(names_layer, model_predictions):
+            if 'conv' not in name_layer:
+                continue
             n_f = model_layer.shape[-1]
             size = model_layer.shape[1]
 

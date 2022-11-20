@@ -78,7 +78,7 @@ model.save('test.h5')
 #  stepsVal=15)
 
 plotCls = PlotModel()
-# plotCls.plot_training(history=history)
+plotCls.plot_training(history=history)
 
 #feature extraction 
 # feature_extractor = tf.keras.Model(
@@ -123,7 +123,6 @@ image /= 255.0
 
 # plotCls.plot_fmap(fmap_shape=FMAP_SHAPE, feature_map=feature_maps)
 
-# dzialaj pls
 
 layer_outputs = [layer.output for layer in model.layers[:10]]
 activation_model = tf.keras.models.Model(inputs=model.input, outputs=layer_outputs)

@@ -77,14 +77,14 @@ model.save('test.h5')
 #  epoch=EPOCHS, stepsPE=100, validationGen=validation_generator.flow(val_tensor, val_label, batch_size=BATCH_SIZE, subset='validation'), 
 #  stepsVal=15)
 
-plotCls = PlotModel()
-plotCls.plot_training(history=history)
+# plotCls = PlotModel()
+# plotCls.plot_training(history=history)
 
 #feature extraction 
-feature_extractor = tf.keras.Model(
-   inputs = model.inputs,
-   outputs = [layer.output for layer in model.layers],
-)
+# feature_extractor = tf.keras.Model(
+#    inputs = model.inputs,
+#    outputs = [layer.output for layer in model.layers],
+# )
 
 # features = feature_extractor(test_generator)
 
@@ -96,3 +96,35 @@ feature_extractor = tf.keras.Model(
 #   return feature_vector
 
 # a = getFeatureVector(model=model, img_path='points/train/denuded/denuded0.png')
+
+imgpath = 'points/train/nondenuded/nondenuded89.png'
+
+for i in range(len(model.layers)):
+    layer = model.layers[i]
+    if 'conv' not in layer.name:
+        continue    
+    print(i , layer.name , layer.output.shape)
+
+model = tf.keras.models.Model(inputs=model.inputs , outputs=model.layers[1].output)
+
+image = tf.keras.utils.load_img(imgpath, target_size=(128,128), color_mode='grayscale')
+
+image = tf.keras.utils.img_to_array(image)
+# expand dimensions so that it represents a single 'sample'
+image = np.expand_dims(image, axis=0)
+
+feature_maps = model.predict(image)
+
+square = 8
+ix = 1
+for _ in range(square):
+	for _ in range(square):
+		# specify subplot and turn of axis
+		ax = plt.subplot(square, square, ix)
+		ax.set_xticks([])
+		ax.set_yticks([])
+		# plot filter channel in grayscale
+		plt.imshow(feature_maps[0, :, :, ix-1], cmap='gray')
+		ix += 1
+# show the figure
+plt.show()

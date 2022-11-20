@@ -78,7 +78,7 @@ model.save('test.h5')
 #  stepsVal=15)
 
 plotCls = PlotModel()
-plotCls.plot_training(history=history)
+# plotCls.plot_training(history=history)
 
 #feature extraction 
 # feature_extractor = tf.keras.Model(
@@ -134,4 +134,52 @@ for layer in model.layers[:10]:
     layer_names.append(layer.name)
 
 
-plotCls.plot_fmaps(layer_names, activations, img_per_row=12)
+# plotCls.plot_fmaps(layer_names, activations, img_per_row=12)
+
+def deprocess_image(x):
+    # Normalizacja tensora: wyśordkowanie w punkcie 0, zapewnienie odchylenia standardowego równego 0,1.
+    x -= x.mean()
+    x /= (x.std() + 1e-5)
+    x *= 0.1
+
+    # Ograniczenie do zakresu [0, 1].
+    x += 0.5
+    x = np.clip(x, 0, 1)
+
+    # Konwersja na formę tablicy RGB.
+    x *= 255
+    x = np.clip(x, 0, 255).astype('uint8')
+    return x
+
+def generate_pattern(layer_name, filter_index, size=150):
+    layer_output = model.get_layer(layer_name).output
+    loss = tf.keras.backend.mean(layer_output[:, :, :, filter_index])
+
+    with tf.GradientTape() as tape:
+            inputs = tf.cast(image, tf.float32)
+            tape.watch(inputs)
+            outputs = model(inputs)
+            loss = tf.reduce_mean(outputs[:, filter_index])
+    grads = tape.gradient(loss, inputs)
+
+    grads /= (tf.keras.backend.sqrt(tf.keras.backend.mean(tf.keras.backend.square(grads))) + tf.keras.backend.epsilon())
+
+    print(grads)
+
+    # Funkcja zwracająca stratę i gradient dla danego obrazu wejściowego.
+    iterate = tf.keras.backend.function([image], [loss, grads])
+    
+    # Zaczynamy od szarego obrazu z szumem.
+    input_img_data = np.random.random((1, size, size, 3)) * 20 + 128.
+
+    # Wykonuje 40 kroków algorytmu zwiększania gradientu.
+    step = 1.
+    for i in range(40):
+        loss_value, grads_value = iterate([input_img_data])
+        input_img_data += grads_value * step
+        
+    img = input_img_data[0]
+    return deprocess_image(img)
+
+plt.imshow(generate_pattern('conv2d_1', 0))
+plt.show()

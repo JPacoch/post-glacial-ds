@@ -7,3 +7,6 @@ PATH_TO_NONDENUDED = "C:/Users/pacoc/Desktop/Warsztat/Studia/mag/data/punkty/dev
 EPOCHS = 2
 BATCH_SIZE = 20
 IMG_WIDTH, IMG_HEIGHT = 128, 128
+
+#ploting args
+FMAP_SHAPE = 8

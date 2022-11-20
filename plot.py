@@ -2,10 +2,6 @@ import matplotlib.pyplot as plt
 
 class PlotModel():
 
-    def __init__(self):
-        self.th = 'th'
-
-
     def plot_training(self, history):
         acc = history.history['accuracy']
         val_acc = history.history['val_accuracy']
@@ -30,6 +26,19 @@ class PlotModel():
     def show_gen_img(self, traingen, img_idx, img_rng):
         for _ in range(img_rng):
             img, label = traingen.next()
-            print(img.shape)   #  (1,256,256,3)
+            print(img.shape)
             plt.imshow(img[img_idx])
+            plt.show()
+    
+    def plot_fmaps(self, fmap_shape, feature_map):
+        for fmap in feature_map:
+            ix = 1 
+            for _ in range(fmap_shape):
+                for _ in range(fmap_shape):
+                    ax = plt.subplot(fmap_shape, fmap_shape, ix)
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+                    plt.imshow(fmap[0, :, :, ix-1], cmap='gray')
+                    ix += 1
+            # plt.title(f'Feature map for Conv2D layer', loc='left')
             plt.show()

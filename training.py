@@ -12,7 +12,7 @@ from sklearn.model_selection import learning_curve
 from plot import PlotModel
 from callbacks import tensor_board, callbacks
 from models_generators import createModel, fitModel
-from config import EPOCHS, IMG_HEIGHT, IMG_WIDTH, BATCH_SIZE
+from config import EPOCHS, IMG_HEIGHT, IMG_WIDTH, BATCH_SIZE, FMAP_SHAPE
 
 
 train_samples=118
@@ -77,8 +77,8 @@ model.save('test.h5')
 #  epoch=EPOCHS, stepsPE=100, validationGen=validation_generator.flow(val_tensor, val_label, batch_size=BATCH_SIZE, subset='validation'), 
 #  stepsVal=15)
 
-# plotCls = PlotModel()
-# plotCls.plot_training(history=history)
+plotCls = PlotModel()
+plotCls.plot_training(history=history)
 
 #feature extraction 
 # feature_extractor = tf.keras.Model(
@@ -98,6 +98,9 @@ model.save('test.h5')
 # a = getFeatureVector(model=model, img_path='points/train/denuded/denuded0.png')
 
 imgpath = 'points/train/nondenuded/nondenuded89.png'
+image = tf.keras.utils.load_img(imgpath, target_size=(128,128), color_mode='grayscale')
+image = tf.keras.utils.img_to_array(image)
+image = np.expand_dims(image, axis=0)
 
 for i in range(len(model.layers)):
     layer = model.layers[i]
@@ -105,26 +108,15 @@ for i in range(len(model.layers)):
         continue    
     print(i , layer.name , layer.output.shape)
 
-model = tf.keras.models.Model(inputs=model.inputs , outputs=model.layers[1].output)
 
-image = tf.keras.utils.load_img(imgpath, target_size=(128,128), color_mode='grayscale')
+# for fmapping multiple layers
+ixs = [0, 3, 4, 7, 8]
+outputs = [model.layers[i+1].output for i in ixs]
+model = tf.keras.models.Model(inputs=model.inputs, outputs=outputs)
 
-image = tf.keras.utils.img_to_array(image)
-# expand dimensions so that it represents a single 'sample'
-image = np.expand_dims(image, axis=0)
+# for single layer use
+# model = tf.keras.models.Model(inputs=model.inputs , outputs=model.layers[1].output)
 
 feature_maps = model.predict(image)
 
-square = 8
-ix = 1
-for _ in range(square):
-	for _ in range(square):
-		# specify subplot and turn of axis
-		ax = plt.subplot(square, square, ix)
-		ax.set_xticks([])
-		ax.set_yticks([])
-		# plot filter channel in grayscale
-		plt.imshow(feature_maps[0, :, :, ix-1], cmap='gray')
-		ix += 1
-# show the figure
-plt.show()
+plotCls.plot_fmaps(fmap_shape=FMAP_SHAPE, feature_map=feature_maps)

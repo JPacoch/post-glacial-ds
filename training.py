@@ -12,7 +12,7 @@ from sklearn.model_selection import learning_curve
 from plot import PlotModel
 from callbacks import tensor_board, callbacks
 from models_generators import createModel, fitModel
-from config import EPOCHS, IMG_HEIGHT, IMG_WIDTH, BATCH_SIZE, FMAP_SHAPE
+from config import EPOCHS, IMG_HEIGHT, IMG_WIDTH, BATCH_SIZE
 
 
 train_samples=118
@@ -78,7 +78,7 @@ model.save('test.h5')
 #  stepsVal=15)
 
 plotCls = PlotModel()
-plotCls.plot_training(history=history)
+# plotCls.plot_training(history=history)
 
 #feature extraction 
 # feature_extractor = tf.keras.Model(
@@ -101,22 +101,38 @@ imgpath = 'points/train/nondenuded/nondenuded89.png'
 image = tf.keras.utils.load_img(imgpath, target_size=(128,128), color_mode='grayscale')
 image = tf.keras.utils.img_to_array(image)
 image = np.expand_dims(image, axis=0)
+image /= 255.0
 
-for i in range(len(model.layers)):
-    layer = model.layers[i]
-    if 'conv' not in layer.name:
-        continue    
-    print(i , layer.name , layer.output.shape)
+
+# for i in range(len(model.layers)):
+#     layer = model.layers[i]
+#     if 'conv' not in layer.name:
+#         continue    
+#     print(i , layer.name , layer.output.shape)
 
 
 # for fmapping multiple layers
-ixs = [0, 3, 4, 7, 8]
-outputs = [model.layers[i+1].output for i in ixs]
-model = tf.keras.models.Model(inputs=model.inputs, outputs=outputs)
+# ixs = [0, 3, 7]
+# outputs = [model.layers[i+1].output for i in ixs]
+# model = tf.keras.models.Model(inputs=model.inputs, outputs=outputs)
 
 # for single layer use
 # model = tf.keras.models.Model(inputs=model.inputs , outputs=model.layers[1].output)
 
-feature_maps = model.predict(image)
+# feature_maps = model.predict(image)
 
-plotCls.plot_fmaps(fmap_shape=FMAP_SHAPE, feature_map=feature_maps)
+# plotCls.plot_fmap(fmap_shape=FMAP_SHAPE, feature_map=feature_maps)
+
+# dzialaj pls
+
+layer_outputs = [layer.output for layer in model.layers[:10]]
+activation_model = tf.keras.models.Model(inputs=model.input, outputs=layer_outputs)
+
+activations = activation_model.predict(image)
+
+layer_names = []
+for layer in model.layers[:10]:
+    layer_names.append(layer.name)
+
+
+plotCls.plot_fmaps(layer_names, activations, img_per_row=12)

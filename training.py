@@ -53,15 +53,19 @@ model = tf.keras.models.Sequential([
     tf.keras.layers.Conv2D(32, 3, activation='relu'),
     tf.keras.layers.BatchNormalization(), 
     tf.keras.layers.MaxPooling2D(2),
+    tf.keras.layers.Conv2D(16, 3, activation='relu'),
+    tf.keras.layers.Conv2D(16, 3, activation='relu'),
+    tf.keras.layers.BatchNormalization(), 
+    tf.keras.layers.MaxPooling2D(2),
     tf.keras.layers.Flatten(),
     tf.keras.layers.BatchNormalization(), 
-    tf.keras.layers.Dense(32, activation='relu'),
+    tf.keras.layers.Dense(16, activation='relu'),
     tf.keras.layers.Dropout(0.4),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
 
 model.compile(loss="binary_crossentropy",
-                optimizer=tf.keras.optimizers.Adam(0.00001),
+                optimizer=tf.keras.optimizers.Adam(0.000001),
                 metrics=['accuracy'])
 model.summary()
 
@@ -71,16 +75,8 @@ history = fitModel(model, trainGen=train_generator, epoch=EPOCHS, stepsPE=train_
 
 model.save('test.h5')
 
-#training for arrays?
-
-#train_generator = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255)
-
-# fitModel(createModel(), trainGen=train_generator.flow(train_tensor, train_label, batch_size=BATCH_SIZE, subset='training'),
-#  epoch=EPOCHS, stepsPE=100, validationGen=validation_generator.flow(val_tensor, val_label, batch_size=BATCH_SIZE, subset='validation'), 
-#  stepsVal=15)
-
 plotCls = PlotModel()
-# plotCls.plot_training(history=history)
+plotCls.plot_training(history=history)
 
 #feature extraction 
 
@@ -96,7 +92,6 @@ image /= 255.0
 #     if 'conv' not in layer.name:
 #         continue    
 #     print(i , layer.name , layer.output.shape)
-
 
 # for fmapping multiple layers
 # ixs = [0, 3, 7]
@@ -117,7 +112,7 @@ activation_model = tf.keras.models.Model(inputs=model.input, outputs=layer_outpu
 activations = activation_model.predict(image)
 
 layer_names = []
-for layer in model.layers[:10]:
+for layer in model.layers[:17]:
     layer_names.append(layer.name)
 
 
@@ -170,9 +165,6 @@ for layer in model.layers[:10]:
 
 # plt.imshow(generate_pattern('conv2d_1', 0))
 # plt.show()
-
-
-
 
 y_pred = model.predict_generator(train_generator, train_generator.samples // train_generator.batch_size+1)
 false_positive, true_positive, ths = roc_curve(train_generator.classes, y_pred)

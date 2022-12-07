@@ -4,6 +4,6 @@ PATH_TO_DENUDED = "C:/Users/pacoc/Desktop/Warsztat/Studia/mag/data/punkty/devide
 PATH_TO_NONDENUDED = "C:/Users/pacoc/Desktop/Warsztat/Studia/mag/data/punkty/devided/nondenuded.gpkg"
 
 #training.py
-EPOCHS = 2
+EPOCHS = 500
 BATCH_SIZE = 20
 IMG_WIDTH, IMG_HEIGHT = 128, 128

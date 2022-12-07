@@ -1,6 +1,5 @@
 import tensorflow as tf
 
-
 #TensorBoard callback
 tensor_board = [
     tf.keras.callbacks.TensorBoard(

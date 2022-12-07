@@ -1,13 +1,6 @@
-import cv2
-import rasterio
 import numpy as np
-import pandas as pd
-import geopandas as gpd
 import tensorflow as tf
 import matplotlib.pyplot as plt
-from turtle import color
-from sklearn import metrics
-from sklearn.model_selection import learning_curve
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc, roc_auc_score
 
 from plot import PlotModel
@@ -69,23 +62,36 @@ model.compile(loss="binary_crossentropy",
                 metrics=['accuracy'])
 model.summary()
 
-#Model learning 
+#Model training 
 history = fitModel(model, trainGen=train_generator, epoch=EPOCHS, stepsPE=train_samples//BATCH_SIZE,
  validationGen=test_generator, stepsVal=test_samples//BATCH_SIZE)
 
-model.save('test.h5')
+model.save('models/new.h5')
 
 plotCls = PlotModel()
 plotCls.plot_training(history=history)
 
-#feature extraction 
+y_pred = model.predict_generator(train_generator, train_generator.samples // train_generator.batch_size+1)
+false_positive, true_positive, ths = roc_curve(train_generator.classes, y_pred)
+auc = auc(false_positive, true_positive)
 
+plt.figure(1)
+plt.plot([0, 1], [0, 1], 'k--')
+plt.plot(false_positive, true_positive, label='area = {:.3f}'.format(auc))
+plt.xlabel('False positive rate')
+plt.ylabel('True positive rate')
+plt.title('ROC curve')
+plt.legend(loc='best')
+plt.show()
+
+conf_matrix(train_generator, model=model)
+
+#Feature extraction 
 imgpath = 'points/train/nondenuded/nondenuded89.png'
 image = tf.keras.utils.load_img(imgpath, target_size=(128,128), color_mode='grayscale')
 image = tf.keras.utils.img_to_array(image)
 image = np.expand_dims(image, axis=0)
 image /= 255.0
-
 
 # for i in range(len(model.layers)):
 #     layer = model.layers[i]
@@ -105,7 +111,6 @@ image /= 255.0
 
 # plotCls.plot_fmap(fmap_shape=FMAP_SHAPE, feature_map=feature_maps)
 
-
 layer_outputs = [layer.output for layer in model.layers[:10]]
 activation_model = tf.keras.models.Model(inputs=model.input, outputs=layer_outputs)
 
@@ -115,68 +120,4 @@ layer_names = []
 for layer in model.layers[:17]:
     layer_names.append(layer.name)
 
-
-# plotCls.plot_fmaps(layer_names, activations, img_per_row=12)
-
-# def deprocess_image(x):
-#     # Normalizacja tensora: wyśordkowanie w punkcie 0, zapewnienie odchylenia standardowego równego 0,1.
-#     x -= x.mean()
-#     x /= (x.std() + 1e-5)
-#     x *= 0.1
-
-#     # Ograniczenie do zakresu [0, 1].
-#     x += 0.5
-#     x = np.clip(x, 0, 1)
-
-#     # Konwersja na formę tablicy RGB.
-#     x *= 255
-#     x = np.clip(x, 0, 255).astype('uint8')
-#     return x
-
-# def generate_pattern(layer_name, filter_index, size=150):
-#     layer_output = model.get_layer(layer_name).output
-#     loss = tf.keras.backend.mean(layer_output[:, :, :, filter_index])
-
-#     with tf.GradientTape() as tape:
-#             inputs = tf.cast(image, tf.float32)
-#             tape.watch(inputs)
-#             outputs = model(inputs)
-#             loss = tf.reduce_mean(outputs[:, filter_index])
-#     grads = tape.gradient(loss, inputs)
-
-#     grads /= (tf.keras.backend.sqrt(tf.keras.backend.mean(tf.keras.backend.square(grads))) + tf.keras.backend.epsilon())
-
-#     print(grads)
-
-#     # Funkcja zwracająca stratę i gradient dla danego obrazu wejściowego.
-#     iterate = tf.keras.backend.function([image], [loss, grads])
-    
-#     # Zaczynamy od szarego obrazu z szumem.
-#     input_img_data = np.random.random((1, size, size, 3)) * 20 + 128.
-
-#     # Wykonuje 40 kroków algorytmu zwiększania gradientu.
-#     step = 1.
-#     for i in range(40):
-#         loss_value, grads_value = iterate([input_img_data])
-#         input_img_data += grads_value * step
-        
-#     img = input_img_data[0]
-#     return deprocess_image(img)
-
-# plt.imshow(generate_pattern('conv2d_1', 0))
-# plt.show()
-
-y_pred = model.predict_generator(train_generator, train_generator.samples // train_generator.batch_size+1)
-false_positive, true_positive, ths = roc_curve(train_generator.classes, y_pred)
-auc = auc(false_positive, true_positive)
-
-plt.figure(1)
-plt.plot([0, 1], [0, 1], 'k--')
-plt.plot(false_positive, true_positive, label='area = {:.3f}'.format(auc))
-plt.xlabel('False positive rate')
-plt.ylabel('True positive rate')
-plt.title('ROC curve')
-plt.legend(loc='best')
-plt.show()
-
-conf_matrix(train_generator, model=model)
+plotCls.plot_fmaps(layer_names, activations, img_per_row=12)

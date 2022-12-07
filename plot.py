@@ -45,7 +45,6 @@ class PlotModel():
             plt.show()
 
     def plot_fmaps(self, names_layer, model_predictions, img_per_row=18):
-
         for name_layer, model_layer in zip(names_layer, model_predictions):
             if 'conv' not in name_layer:
                 continue
@@ -73,6 +72,5 @@ class PlotModel():
                                 scale * grid_plot.shape[0]))
             plt.title(name_layer)
             plt.grid(False)
-            plt.imshow(grid_plot, aspect='auto', cmap='viridis')
-            
+            plt.imshow(grid_plot, aspect='auto', cmap='viridis')         
         plt.show()

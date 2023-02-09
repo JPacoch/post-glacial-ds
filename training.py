@@ -7,7 +7,7 @@ from plot import PlotModel
 from utils import conf_matrix
 from callbacks import tensor_board, callbacks
 from models_generators import createModel, fitModel
-from config import EPOCHS, IMG_HEIGHT, IMG_WIDTH, BATCH_SIZE
+from config import EPOCHS, IMG_HEIGHT, IMG_WIDTH, BATCH_SIZE, FMAP_SITES
 
 
 train_samples=118
@@ -86,38 +86,42 @@ plt.show()
 
 conf_matrix(train_generator, model=model)
 
-#Feature extraction 
-imgpath = 'points/train/nondenuded/nondenuded89.png'
-image = tf.keras.utils.load_img(imgpath, target_size=(128,128), color_mode='grayscale')
-image = tf.keras.utils.img_to_array(image)
-image = np.expand_dims(image, axis=0)
-image /= 255.0
+#Feature extraction
+trainpath = 'points/train/nondenuded/'
 
-# for i in range(len(model.layers)):
-#     layer = model.layers[i]
-#     if 'conv' not in layer.name:
-#         continue    
-#     print(i , layer.name , layer.output.shape)
+#imgpath = 'points/train/nondenuded/nondenuded89.png'
+for path in FMAP_SITES:
+    imgpath = trainpath + path + '.png'
+    image = tf.keras.utils.load_img(imgpath, target_size=(128,128), color_mode='grayscale')
+    image = tf.keras.utils.img_to_array(image)
+    image = np.expand_dims(image, axis=0)
+    image /= 255.0
 
-# for fmapping multiple layers
-# ixs = [0, 3, 7]
-# outputs = [model.layers[i+1].output for i in ixs]
-# model = tf.keras.models.Model(inputs=model.inputs, outputs=outputs)
+    # for i in range(len(model.layers)):
+    #     layer = model.layers[i]
+    #     if 'conv' not in layer.name:
+    #         continue    
+    #     print(i , layer.name , layer.output.shape)
 
-# for single layer use
-# model = tf.keras.models.Model(inputs=model.inputs , outputs=model.layers[1].output)
+    # for fmapping multiple layers
+    # ixs = [0, 3, 7]
+    # outputs = [model.layers[i+1].output for i in ixs]
+    # model = tf.keras.models.Model(inputs=model.inputs, outputs=outputs)
 
-# feature_maps = model.predict(image)
+    # for single layer use
+    # model = tf.keras.models.Model(inputs=model.inputs , outputs=model.layers[1].output)
 
-# plotCls.plot_fmap(fmap_shape=FMAP_SHAPE, feature_map=feature_maps)
+    # feature_maps = model.predict(image)
 
-layer_outputs = [layer.output for layer in model.layers[:10]]
-activation_model = tf.keras.models.Model(inputs=model.input, outputs=layer_outputs)
+    # plotCls.plot_fmap(fmap_shape=FMAP_SHAPE, feature_map=feature_maps)
 
-activations = activation_model.predict(image)
+    layer_outputs = [layer.output for layer in model.layers[:10]]
+    activation_model = tf.keras.models.Model(inputs=model.input, outputs=layer_outputs)
 
-layer_names = []
-for layer in model.layers[:17]:
-    layer_names.append(layer.name)
+    activations = activation_model.predict(image)
 
-plotCls.plot_fmaps(layer_names, activations, img_per_row=12)
+    layer_names = []
+    for layer in model.layers[:17]:
+        layer_names.append(layer.name)
+
+    plotCls.plot_fmaps(layer_names, activations, imgname=path, img_per_row=12)

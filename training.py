@@ -66,7 +66,7 @@ model.summary()
 history = fitModel(model, trainGen=train_generator, epoch=EPOCHS, stepsPE=train_samples//BATCH_SIZE,
  validationGen=test_generator, stepsVal=test_samples//BATCH_SIZE)
 
-model.save('models/new.h5')
+model.save('models/test2.h5')
 
 plotCls = PlotModel()
 plotCls.plot_training(history=history)
@@ -87,7 +87,7 @@ plt.show()
 conf_matrix(train_generator, model=model)
 
 #Feature extraction
-trainpath = 'points/train/nondenuded/'
+trainpath = 'points/train/'
 
 #imgpath = 'points/train/nondenuded/nondenuded89.png'
 for path in FMAP_SITES:

@@ -7,8 +7,8 @@ PATH_TO_NONDENUDED = "C:/Users/pacoc/Desktop/Warsztat/Studia/mag/data/punkty/dev
 PATH_TO_FMAPS = "plots/fmaps/"
 
 #training.py
-FMAP_SITES = ['denuded5', 'denuded13', 'denuded33', 'denuded34', 'nondenuded50', 'denuded51', 'nondenuded57', 'nondenuded58', 'nondenuded72', 'nondenuded89']
+FMAP_SITES = ['denuded/denuded5', 'denuded/denuded13', 'denuded/denuded33', 'denuded/denuded34', 'nondenuded/nondenuded50', 'denuded/denuded51', 'denuded/denuded57', 'nondenuded/nondenuded58', 'nondenuded/nondenuded72', 'nondenuded/nondenuded89']
 
-EPOCHS = 2
+EPOCHS = 250
 BATCH_SIZE = 20
 IMG_WIDTH, IMG_HEIGHT = 128, 128

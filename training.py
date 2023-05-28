@@ -34,25 +34,25 @@ test_generator = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255)
                                                                          shuffle=True)
 
 model = tf.keras.models.Sequential([
-    tf.keras.layers.Conv2D(128, 3, activation='relu', 
+    tf.keras.layers.Conv2D(16, 3, activation='relu', 
                                             input_shape=[IMG_WIDTH,IMG_HEIGHT,1]),
     tf.keras.layers.BatchNormalization(),                                        
     tf.keras.layers.MaxPooling2D(2),
-    tf.keras.layers.Conv2D(64, 3, activation='relu'),
-    tf.keras.layers.Conv2D(64, 3, activation='relu'),
-    tf.keras.layers.BatchNormalization(), 
-    tf.keras.layers.MaxPooling2D(2),
     tf.keras.layers.Conv2D(32, 3, activation='relu'),
     tf.keras.layers.Conv2D(32, 3, activation='relu'),
     tf.keras.layers.BatchNormalization(), 
     tf.keras.layers.MaxPooling2D(2),
-    tf.keras.layers.Conv2D(16, 3, activation='relu'),
-    tf.keras.layers.Conv2D(16, 3, activation='relu'),
+    tf.keras.layers.Conv2D(64, 3, activation='relu'),
+    tf.keras.layers.Conv2D(64, 3, activation='relu'),
+    tf.keras.layers.BatchNormalization(), 
+    tf.keras.layers.MaxPooling2D(2),
+    tf.keras.layers.Conv2D(128, 3, activation='relu'),
+    tf.keras.layers.Conv2D(128, 3, activation='relu'),
     tf.keras.layers.BatchNormalization(), 
     tf.keras.layers.MaxPooling2D(2),
     tf.keras.layers.Flatten(),
     tf.keras.layers.BatchNormalization(), 
-    tf.keras.layers.Dense(16, activation='relu'),
+    tf.keras.layers.Dense(128, activation='relu'),
     tf.keras.layers.Dropout(0.4),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
@@ -66,7 +66,7 @@ model.summary()
 history = fitModel(model, trainGen=train_generator, epoch=EPOCHS, stepsPE=train_samples//BATCH_SIZE,
  validationGen=test_generator, stepsVal=test_samples//BATCH_SIZE)
 
-model.save('models/test2.h5')
+model.save('models/june1.h5')
 
 plotCls = PlotModel()
 plotCls.plot_training(history=history)
@@ -77,7 +77,7 @@ auc = auc(false_positive, true_positive)
 
 plt.figure(1)
 plt.plot([0, 1], [0, 1], 'k--')
-plt.plot(false_positive, true_positive, label='area = {:.3f}'.format(auc))
+plt.plot(false_positive, true_positive, 'k', label='area = {:.3f}'.format(auc))
 plt.xlabel('False positive rate')
 plt.ylabel('True positive rate')
 plt.title('ROC curve')

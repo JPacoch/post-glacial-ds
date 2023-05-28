@@ -12,15 +12,15 @@ class PlotModel():
         val_loss = history.history['val_loss']
         epochn = range(len(acc))
 
-        plt.plot(epochn, acc, 'bo', label = 'Training accuracy')
-        plt.plot(epochn, val_acc, 'b', label = 'Validation accuracy')
+        plt.plot(epochn, acc, 'k', label = 'Training accuracy')
+        plt.plot(epochn, val_acc, 'k--', linewidth=0.5, label = 'Validation accuracy')
         plt.title('Validation and training accuracy')
         plt.legend()
 
         plt.figure()
 
-        plt.plot(epochn, loss, 'bo', label = 'Training loss')
-        plt.plot(epochn, val_loss, 'b', label = 'Validation loss')
+        plt.plot(epochn, loss, 'k', label = 'Training loss')
+        plt.plot(epochn, val_loss, 'k--', linewidth=0.5, label = 'Validation loss')
         plt.title('Validation and training loss')
         plt.legend()
 

@@ -52,13 +52,14 @@ model = tf.keras.models.Sequential([
     tf.keras.layers.MaxPooling2D(2),
     tf.keras.layers.Flatten(),
     tf.keras.layers.BatchNormalization(), 
-    tf.keras.layers.Dense(128, activation='relu'),
     tf.keras.layers.Dropout(0.4),
+    tf.keras.layers.Dense(128, activation='relu'),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
 
+
 model.compile(loss="binary_crossentropy",
-                optimizer=tf.keras.optimizers.Adam(0.000001),
+                optimizer=tf.keras.optimizers.Adam(0.0000001),
                 metrics=['accuracy'])
 model.summary()
 
@@ -71,12 +72,12 @@ model.save('models/june1.h5')
 plotCls = PlotModel()
 plotCls.plot_training(history=history)
 
-y_pred = model.predict_generator(train_generator, train_generator.samples // train_generator.batch_size+1)
-false_positive, true_positive, ths = roc_curve(train_generator.classes, y_pred)
+y_pred = model.predict_generator(test_generator, test_generator.samples // test_generator.batch_size+1)
+false_positive, true_positive, ths = roc_curve(test_generator.classes, y_pred)
 auc = auc(false_positive, true_positive)
 
 plt.figure(1)
-plt.plot([0, 1], [0, 1], 'k--')
+plt.plot([0, 1], [0, 1], 'k--', linewidth=0.5)
 plt.plot(false_positive, true_positive, 'k', label='area = {:.3f}'.format(auc))
 plt.xlabel('False positive rate')
 plt.ylabel('True positive rate')
@@ -84,7 +85,7 @@ plt.title('ROC curve')
 plt.legend(loc='best')
 plt.show()
 
-conf_matrix(train_generator, model=model)
+conf_matrix(test_generator, model=model)
 
 #Feature extraction
 trainpath = 'points/train/'

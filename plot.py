@@ -19,6 +19,19 @@ class PlotModel():
 
         plt.figure()
 
+        plt.plot(epochn, acc, 'k', label = 'Training accuracy')
+        plt.plot(epochn, loss, 'k--', label = 'Training loss')
+        plt.title('Training accuracy and loss')
+        plt.legend()
+
+        plt.figure()
+
+        plt.plot(epochn, acc, 'k', label = 'Training accuracy')
+        plt.title('Training accuracy')
+        plt.legend()
+
+        plt.figure()
+
         plt.plot(epochn, loss, 'k', label = 'Training loss')
         plt.plot(epochn, val_loss, 'k--', linewidth=0.5, label = 'Validation loss')
         plt.title('Validation and training loss')
@@ -74,6 +87,8 @@ class PlotModel():
                                 scale * grid_plot.shape[0]))
             plt.title(name_layer)
             plt.grid(False)
-            plt.imshow(grid_plot, aspect='auto', cmap='viridis')
+            plt.tick_params(axis='both', which='both', bottom=False, top=False, left=False, right=False, labelbottom=False, labelleft=False)
+            plt.imshow(grid_plot, aspect='auto', cmap='gray')
+            plt.colorbar()
             plt.savefig(PATH_TO_FMAPS + imgname + name_layer + '.png')         
         plt.show()
